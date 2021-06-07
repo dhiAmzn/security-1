@@ -50,6 +50,8 @@ import org.opensearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.opensearch.action.admin.cluster.node.info.NodeInfo;
 import org.opensearch.action.admin.cluster.node.info.NodesInfoRequest;
 import org.opensearch.action.admin.cluster.node.info.NodesInfoResponse;
+import org.opensearch.action.admin.cluster.node.stats.NodesStatsRequest;
+import org.opensearch.action.admin.cluster.node.stats.NodesStatsResponse;
 import org.opensearch.action.admin.indices.template.put.PutIndexTemplateRequest;
 import org.opensearch.action.support.master.AcknowledgedResponse;
 import org.opensearch.client.Client;
@@ -284,6 +286,7 @@ public final class ClusterHelper {
                     .setWaitForStatus(status).setTimeout(timeout).setMasterNodeTimeout(timeout).setWaitForNodes("" + expectedNodeCount).execute()
                     .actionGet();
             if (healthResponse.isTimedOut()) {
+                final NodesStatsResponse res = client.admin().cluster().nodesStats(new NodesStatsRequest().all()).actionGet();
                 throw new IOException("cluster state is " + healthResponse.getStatus().name() + " with "
                         + healthResponse.getNumberOfNodes() + " nodes");
             } else {
@@ -374,7 +377,6 @@ public final class ClusterHelper {
                 .put("transport.tcp.port", tcpPort)
                 .put("http.port", httpPort)
                 //.put("http.enabled", true)
-                .put("cluster.routing.allocation.disk.threshold_enabled", false)
                 .put("http.cors.enabled", true)
                 .put("path.home", "./target");
     }
